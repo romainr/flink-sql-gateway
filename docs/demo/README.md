@@ -213,3 +213,9 @@ And update the *tables:* and *functions:* sections like in [sql-gateway-defaults
     - name: toCoords
       from: class
       class: com.ververica.sql_training.udfs.ToCoords
+
+
+
+Currently we need to start the SQL gateway with these jars:
+
+    ./sql-gateway.sh -j /opt/flink/lib/flink-table_2.11-1.10.0.jar -j /opt/flink/lib/flink-table-blink_2.11-1.10.0.jar /opt/flink/lib/flink-dist_2.11-1.10.0.jar
