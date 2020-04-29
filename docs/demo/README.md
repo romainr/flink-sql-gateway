@@ -25,6 +25,8 @@ Grab a [release](https://github.com/ververica/flink-sql-gateway/releases) of the
 
     echo $FLINK_HOME
 
+Then we are ready to boot it:
+
     cd bin
     ./sql-gateway.sh
 
@@ -36,6 +38,36 @@ Grab a [release](https://github.com/ververica/flink-sql-gateway/releases) of the
 
     curl -X POST localhost:8083/v1/sessions -d '{"planner":"blink","execution_type":"streaming"}'
     > {"session_id":"7eea0827c249e5a8fcbe129422f049e8"}
+
+
+Note:
+
+If setting up the gateway in the client container and we want to access it via your local host, we need to update its bind IP with the IP of the sql clien container:
+
+    docker ps
+    > CONTAINER ID        IMAGE                                                COMMAND                  CREATED              STATUS              PORTS                                                NAMES
+    > 638574b31cd6        fhueske/flink-sql-training:1-FLINK-1.10-scala_2.11   "/docker-entrypoint.…"   About a minute ago   Up About a minute   6123/tcp, 8081/tcp                                   flink-sql-training_sql-client_1
+    > 59d1627c412a        wurstmeister/kafka:2.12-2.2.1                        "start-kafka.sh"         About a minute ago   Up About a minute   0.0.0.0:9092->9092/tcp                               flink-sql-training_kafka_1
+    > 6711c0707f1e        flink:1.10.0-scala_2.11                              "/docker-entrypoint.…"   About a minute ago   Up About a minute   6121-6123/tcp, 8081/tcp                              flink-sql-training_taskmanager_1
+    > 6a8149af6c1e        flink:1.10.0-scala_2.11                              "/docker-entrypoint.…"   About a minute ago   Up About a minute   6123/tcp, 0.0.0.0:8081->8081/tcp                     flink-sql-training_jobmanager_1
+    > 3de8275dff26        wurstmeister/zookeeper:3.4.6                         "/bin/sh -c '/usr/sb…"   About a minute ago   Up About a minute   22/tcp, 2888/tcp, 3888/tcp, 0.0.0.0:2181->2181/tcp   flink-sql-training_zookeeper_1
+    > a28cee7627a0        mysql:8.0.19                                         "docker-entrypoint.s…"   About a minute ago   Up About a minute   3306/tcp, 33060/tcp                                  flink-sql-training_mysql_1
+
+    docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' 638574b31cd6
+    > 172.18.0.7
+
+And change the two address properties:
+
+   apt-get update
+   apt-get install vim
+   vim conf/sql-gateway-defaults.yaml
+
+    server:
+      # The address that the gateway binds itself.
+      bind-address: 172.18.0.7
+      # The address that should be used by clients to connect to the gateway.
+      address: 172.18.0.7
+
 
 ## Adding tables
 
