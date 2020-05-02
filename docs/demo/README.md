@@ -73,6 +73,9 @@ And change the two address properties:
 
 Now we are configuring the gateway to load the demo tables and borrow from https://github.com/ververica/sql-training/blob/master/build-image/conf/sql-client-conf.yaml
 
+    apt-get update
+    apt-get install vim
+
     vim ../conf/sql-gateway-defaults.yaml
 
 And update the *tables:* and *functions:* sections like in [sql-gateway-defaults.yaml](sql-gateway-defaults.yaml):
@@ -219,3 +222,10 @@ And update the *tables:* and *functions:* sections like in [sql-gateway-defaults
 Currently we need to start the SQL gateway with these jars:
 
     ./sql-gateway.sh -j /opt/flink/lib/flink-table_2.11-1.10.0.jar -j /opt/flink/lib/flink-table-blink_2.11-1.10.0.jar /opt/flink/lib/flink-dist_2.11-1.10.0.jar
+
+## Query Editor
+
+  [[[flink]]]
+    name=Flink
+    interface=flink
+    options='{"api_url": "http://flink:10000"}'
