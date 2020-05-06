@@ -25,9 +25,9 @@
 #==============================================================================
 server:
   # The address that the gateway binds itself.
-  bind-address: 127.0.0.1
+  bind-address: flink-sql-training_sql-client_1
   # The address that should be used by clients to connect to the gateway.
-  address: 127.0.0.1
+  address: flink-sql-training_sql-client_1
   # The port that the client connects to.
   port: 8083
   # The jvm args for SQL gateway process,
@@ -41,7 +41,7 @@ server:
 session:
   # Session will be closed when it's not accessed for this duration, which can be disabled by setting to zero.
   # the minimum unit is in milliseconds.
-  idle-timeout: 1d
+  idle-timeout: 2h
   # The check interval for session idle timeout, which can be disabled by setting to zero.
   # the minimum unit is in milliseconds.
   check-interval: 1h

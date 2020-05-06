@@ -1,22 +1,26 @@
 
-# Flink SQL Gateway Demo
+# Flink SQL Editor
 
-The goal is to get an SQL gateway pointed to a Flink cluster with live data for easy demoing of the SQL capabilities.
+The goal is to demo how to execute Flink SQL queries. We use the new Flink SQL gateway project and point to a Flink cluster with live data in a docker container. Hue is used as the SQL Editor for querying Flink tables.
 
 ## Setup
 
-Flink demo cluster is based on https://github.com/ververica/sql-training which has good [setup instructions](https://github.com/ververica/sql-training/wiki/Setting-up-the-Training-Environment):
+Flink demo cluster is based on https://github.com/ververica/sql-training which has easy [setup instructions](https://github.com/ververica/sql-training/wiki/Setting-up-the-Training-Environment):
 
     git clone https://github.com/ververica/sql-training.git
     cd sql-training
     docker-compose up -d
 
+Then http://localhost:8081/#/overview should be up.
 
-Here we start a SQL client container to install the gateway (to avoid installing Flink again) but this could be done locally or in another of the containers.
+[image ]
+
+
+Here we start a SQL client container and install the gateway inside (to avoid installing a local Flink as the gateway needs a FLINK_HOME) but this could be done locally or in another containers.
 
     docker-compose exec sql-client bash
 
-Grab a [release](https://github.com/ververica/flink-sql-gateway/releases) of the gateway:
+We Grab a [release](https://github.com/ververica/flink-sql-gateway/releases) of the gateway:
 
     cd /opt
     wget https://github.com/ververica/flink-sql-gateway/releases/download/v0.1-snapshot/flink-sql-gateway-0.1-SNAPSHOT-bin.zip
@@ -25,13 +29,20 @@ Grab a [release](https://github.com/ververica/flink-sql-gateway/releases) of the
 
     echo $FLINK_HOME
 
-Then we are ready to boot it:
+Then we copy the Flink SQL config to the gateway so that we get the demo tables by default:
+
+    docker cp docs/demo/sql-gateway-defaults.yaml flink-sql-training_sql-client_1:/opt/flink-sql-gateway-0.1-SNAPSHOT/conf/
+
+And we are ready to boot it:
 
     cd bin
-    ./sql-gateway.sh
+    ./sql-gateway.sh --library /opt/sql-client/lib
 
-    CTRL-Z
+Putting the server in the background with `CTRL-Z` and then:
+
     bg
+
+And now we can issue a few commands to validate the setup:
 
     curl localhost:8083/v1/info
     > {"product_name":"Apache Flink","version":"1.10.0"}
@@ -40,9 +51,21 @@ Then we are ready to boot it:
     > {"session_id":"7eea0827c249e5a8fcbe129422f049e8"}
 
 
-Note:
+## Query Editor
 
-If setting up the gateway in the client container and we want to access it via your local host, we need to update its bind IP with the IP of the sql clien container:
+As detailed in the [connector](https://docs.gethue.com/administrator/configuration/connectors/) section of Hue, we add a Flink interpreter:
+
+    [notebook]
+    [[interpreters]]
+
+    [[[flink]]]
+      name=Flink
+      interface=flink
+      options='{"api_url": "http://172.18.0.7:8993"}'
+
+If setting up the gateway in the client container and we want to access it via your local host, we need to update its bind IP with the IP of the sql client container.
+
+The IP of the API is the one of the running container. We inspect the `flink-sql-training_sql-client_1` to retrieve its IP:
 
     docker ps
     > CONTAINER ID        IMAGE                                                COMMAND                  CREATED              STATUS              PORTS                                                NAMES
@@ -56,17 +79,22 @@ If setting up the gateway in the client container and we want to access it via y
     docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' 638574b31cd6
     > 172.18.0.7
 
-And change the two address properties:
+## Next
 
-   apt-get update
-   apt-get install vim
-   vim conf/sql-gateway-defaults.yaml
+There are lot of [future iterations](https://github.com/cloudera/hue/blob/master/docs/designs/apache_flink.md) on this first version to make it production ready but the base is getting there.
+
+It should also be possible to deploy the SQL gateway not in the SQL client container by having:
+
+* local Flink [binary package](https://www.apache.org/dyn/closer.lua/flink/flink-1.10.0/flink-1.10.0-bin-scala_2.11.tgz) with FLINK_HOME configured
+* Updating the `jobmanager.rpc.address` to the real jobmanger address in $FLINK_HOME/conf/flink-conf.yaml
+* Changing the two address properties: sql-gateway-defaults.yaml
 
     server:
       # The address that the gateway binds itself.
       bind-address: 172.18.0.7
       # The address that should be used by clients to connect to the gateway.
       address: 172.18.0.7
+
 
 
 ## Adding tables
@@ -216,16 +244,3 @@ And update the *tables:* and *functions:* sections like in [sql-gateway-defaults
     - name: toCoords
       from: class
       class: com.ververica.sql_training.udfs.ToCoords
-
-
-
-Currently we need to start the SQL gateway with these jars:
-
-    ./sql-gateway.sh -j /opt/flink/lib/flink-table_2.11-1.10.0.jar -j /opt/flink/lib/flink-table-blink_2.11-1.10.0.jar /opt/flink/lib/flink-dist_2.11-1.10.0.jar
-
-## Query Editor
-
-  [[[flink]]]
-    name=Flink
-    interface=flink
-    options='{"api_url": "http://flink:10000"}'
