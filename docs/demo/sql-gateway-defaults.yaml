@@ -25,9 +25,9 @@
 #==============================================================================
 server:
   # The address that the gateway binds itself.
-  bind-address: flink-sql-training_sql-client_1
+  bind-address: sql-training_sql-client_1
   # The address that should be used by clients to connect to the gateway.
-  address: flink-sql-training_sql-client_1
+  address: sql-training_sql-client_1
   # The port that the client connects to.
   port: 8083
   # The jvm args for SQL gateway process,
