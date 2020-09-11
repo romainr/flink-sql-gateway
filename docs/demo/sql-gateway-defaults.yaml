@@ -207,9 +207,9 @@ tables: #[] # empty list
 # Define scalar, aggregate, or table functions here.
 
 functions: #[] # empty list
-- name: timeDiff
-  from: class
-  class: com.ververica.sql_training.udfs.TimeDiff
+#- name: timeDiff
+#  from: class
+#  class: com.ververica.sql_training.udfs.TimeDiff
 - name: isInNYC
   from: class
   class: com.ververica.sql_training.udfs.IsInNYC
