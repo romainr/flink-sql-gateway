@@ -215,3 +215,15 @@ You might want to run the gateway on a standalone Flink cluster or with Yarn / K
     ```
 
 Flink SQL gateway currently hasn't been tested against per-job execution mode. We'll test and support this in the future.
+
+# Build
+
+    mvn package
+
+or
+
+    mvn package -DskipTests
+
+Then update the `flink-sql-gateway-0.3-SNAPSHOT.jar` in `/flink-sql-gateway-0.3-SNAPSHOT/lib` in the `flink-sql-gateway-0.3-SNAPSHOT.zip` relase.
+
+e.g. https://github.com/MarcelLeon/flink-sql-gateway/releases
